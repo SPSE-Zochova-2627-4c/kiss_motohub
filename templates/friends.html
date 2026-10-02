@@ -1,0 +1,91 @@
+{#
+  friends.html – priatelia: vyhľadávanie jazdcov, žiadosti a zoznam priateľov.
+  Dáta pripravuje routes/friends.py -> index().
+#}
+{% extends 'base.html' %}
+{% from 'partials/macros.html' import avatar, friend_button with context %}
+
+{% block title %}Priatelia — MotoHub{% endblock %}
+
+{% macro person_row(user, state) %}
+  <li class="person-row">
+    <a href="{{ url_for('profile.view', username=user.username) }}" class="person-link">
+      {{ avatar(user, 46) }}
+      <span>
+        <b>{{ user.name }}</b>
+        <small>@{{ user.username }}{% if user.location %} · {{ user.location }}{% endif %}</small>
+      </span>
+    </a>
+    {{ friend_button(user, state, request.full_path, compact=true) }}
+  </li>
+{% endmacro %}
+
+{% block content %}
+<main class="wrap page friends-page">
+  <div class="page-head">
+    <h1>Priatelia</h1>
+    <p>Nájdi jazdcov podľa mena a pridaj si ich medzi priateľov.</p>
+  </div>
+
+  {# ---------- vyhľadávanie (GET – výsledok sa dá zdieľať ako odkaz) ---------- #}
+  <form method="get" action="{{ url_for('friends.index') }}" class="search-panel friend-search">
+    <input type="search" name="q" value="{{ query }}" placeholder="Hľadaj meno alebo @používateľa…" minlength="2" maxlength="40" autocomplete="off" autofocus>
+    <button type="submit">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Hľadať
+    </button>
+  </form>
+
+  {% if query %}
+    <section class="panel">
+      <h2>Výsledky pre „{{ query }}“</h2>
+      {% if query|length < 2 %}
+        <p class="muted">Zadaj aspoň 2 znaky.</p>
+      {% elif results %}
+        <ul class="person-list">
+          {% for user, state in results %}{{ person_row(user, state) }}{% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Nikoho sme nenašli. Skús iné meno.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <div class="friends-grid">
+    <section class="panel">
+      <h2>Moji priatelia <span class="count">{{ friends|length }}</span></h2>
+      {% if friends %}
+        <ul class="person-list">
+          {% for user in friends %}{{ person_row(user, 'friends') }}{% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Zatiaľ nemáš žiadnych priateľov. Vyhľadaj jazdcov hore.</p>
+      {% endif %}
+    </section>
+
+    <div class="friends-side">
+      <section class="panel">
+        <h2>Žiadosti pre mňa {% if incoming %}<span class="count hot">{{ incoming|length }}</span>{% endif %}</h2>
+        {% if incoming %}
+          <ul class="person-list">
+            {% for req in incoming %}{{ person_row(req.requester, 'pending_in') }}{% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">Žiadne nové žiadosti.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <h2>Odoslané žiadosti</h2>
+        {% if outgoing %}
+          <ul class="person-list">
+            {% for req in outgoing %}{{ person_row(req.addressee, 'pending_out') }}{% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">Nečakáš na žiadnu odpoveď.</p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,58 @@
+{#
+  auth/login.html – formulár prihlásenia.
+  Spracúva ho routes/auth.py -> login(). Prihlásiť sa dá menom alebo e-mailom.
+#}
+{% extends 'base.html' %}
+
+{% block title %}Prihlásenie — MotoHub{% endblock %}
+
+{% block content %}
+<main class="wrap auth-page">
+  <div class="auth-card">
+    <div class="auth-head">
+      <h1>Vitaj späť</h1>
+      <p>Prihlás sa do svojho MotoHub účtu.</p>
+    </div>
+
+    {% if error %}
+      <div class="form-alert" role="alert">{{ error }}</div>
+    {% endif %}
+
+    {# novalidate: kontrolu robí náš JavaScript a hlavne server, nie prehliadač #}
+    <form method="post" action="{{ url_for('auth.login') }}" class="auth-form" novalidate>
+      {# Skrytý CSRF token – bez neho server formulár odmietne (pozri security.py) #}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+
+      <label class="field">
+        <span>Používateľské meno alebo e-mail</span>
+        <input type="text" name="identifier" value="{{ identifier }}" autocomplete="username" required autofocus>
+      </label>
+
+      <label class="field">
+        <span>Heslo</span>
+        <div class="password-wrap">
+          <input type="password" name="password" autocomplete="current-password" required>
+          <button type="button" class="toggle-pass" aria-label="Zobraziť heslo">Zobraziť</button>
+        </div>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="remember">
+        <span>Zapamätať si ma na 30 dní</span>
+      </label>
+
+      <button type="submit" class="btn-primary btn-block">Prihlásiť sa</button>
+    </form>
+
+    <p class="auth-switch">
+      Ešte nemáš účet?
+      <a href="{{ url_for('auth.register', next=next_url) if next_url else url_for('auth.register') }}">Zaregistruj sa</a>
+    </p>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

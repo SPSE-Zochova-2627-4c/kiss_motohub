@@ -1,0 +1,23 @@
+# =============================================================
+# Súbory, ktoré sa NIKDY nenahrávajú na GitHub
+# =============================================================
+
+# Tajné údaje – API kľúče
+.env
+
+# Databáza, tajný kľúč session a nahraté fotky (každá inštalácia má vlastné)
+instance/
+*.db
+*.sqlite3
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Editory a systém
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

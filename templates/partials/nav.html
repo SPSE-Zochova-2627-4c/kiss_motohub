@@ -1,0 +1,71 @@
+{# partials/nav.html – horná navigácia. Premenná `active` určuje zvýraznenú položku. #}
+{% from 'partials/macros.html' import avatar with context %}
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="{{ url_for('main.home') }}">
+      <svg class="mark" viewBox="0 0 26 26" fill="none"><path d="M13 2 L23 22 L13 15 L3 22 Z" fill="url(#g)"/><defs><linearGradient id="g" x1="3" y1="2" x2="23" y2="22"><stop stop-color="#c9a6ff"/><stop offset="1" stop-color="#8b34f0"/></linearGradient></defs></svg>
+      Moto<b>Hub</b>
+    </a>
+    <ul class="navlinks">
+      <li><a href="{{ url_for('main.home') }}" class="{{ 'active' if active == 'home' else '' }}">Domov</a></li>
+      <li><a href="{{ url_for('main.motorky') }}" class="{{ 'active' if active == 'motorky' else '' }}">Motorky</a></li>
+      <li><a href="{{ url_for('compare.page') }}" class="{{ 'active' if active == 'porovnanie' else '' }}">Porovnanie</a></li>
+      <li><a href="#">Trasy</a></li>
+      <li><a href="#">Lokácie</a></li>
+      <li><a href="#">Meetupy</a></li>
+      <li><a href="#">Komunita</a></li>
+      <li><a href="{{ url_for('profile.my_profile') }}" class="{{ 'active' if active in ('profil', 'priatelia') else '' }}">Profil</a></li>
+    </ul>
+
+    {% if current_user %}
+      {# PRIHLÁSENÝ: meno + rozbaľovacie menu s odhlásením #}
+      <div class="user-menu" id="user-menu">
+        <button type="button" class="user-btn" id="user-btn" aria-haspopup="true" aria-expanded="false">
+          <span class="nav-avatar">
+            {{ avatar(current_user, 30) }}
+            {# červené číslo = nevybavené žiadosti o priateľstvo #}
+            {% if pending_requests %}<span class="badge" title="Nové žiadosti o priateľstvo">{{ pending_requests }}</span>{% endif %}
+          </span>
+          <span class="user-name">{{ current_user.name }}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="user-dropdown" role="menu">
+          <a class="dropdown-head" href="{{ url_for('profile.my_profile') }}">
+            {{ avatar(current_user, 40) }}
+            <span>
+              <b>{{ current_user.name }}</b>
+              <small>@{{ current_user.username }}</small>
+            </span>
+          </a>
+          <a href="{{ url_for('profile.my_profile') }}" role="menuitem">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            Môj profil</a>
+          <a href="{{ url_for('profile.edit') }}" role="menuitem">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Upraviť profil</a>
+          <a href="{{ url_for('friends.index') }}" role="menuitem">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="18" cy="8" r="2.4"/><path d="M16.5 14.3c2.6.5 4.5 2.6 4.5 5.7"/></svg>
+            Priatelia
+            {% if pending_requests %}<span class="menu-badge">{{ pending_requests }}</span>{% endif %}</a>
+          <a href="{{ url_for('profile.my_profile') }}#ulozene" role="menuitem">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4Z"/></svg>
+            Uložené motorky</a>
+          <div class="menu-sep"></div>
+          {# Odhlásenie je formulár s POST + CSRF tokenom, nie obyčajný odkaz #}
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="logout-btn" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Odhlásiť sa</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      {# NEPRIHLÁSENÝ: tlačidlo na prihlásenie #}
+      <a class="cta-ghost" href="{{ url_for('auth.login') }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        Prihlásiť sa
+      </a>
+    {% endif %}
+  </div>
+</header>

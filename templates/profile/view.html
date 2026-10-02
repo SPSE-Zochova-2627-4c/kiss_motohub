@@ -1,0 +1,158 @@
+{#
+  profile/view.html – zobrazenie profilu (môjho aj cudzieho).
+  Dáta pripravuje routes/profile.py -> view():
+    profile  ... zobrazovaný používateľ
+    state    ... vzťah so mnou: self / friends / pending_out / pending_in / none
+    can_see  ... môžem vidieť detaily? (súkromný profil vidia iba priatelia)
+    saved, liked, friends ... zoznamy pre jednotlivé záložky
+#}
+{% extends 'base.html' %}
+{# "with context" = makrá vidia aj csrf_token() a current_user #}
+{% from 'partials/macros.html' import avatar, friend_button, bike_link with context %}
+
+{% block title %}{{ profile.name }} — MotoHub{% endblock %}
+
+{% block content %}
+<main class="wrap page profile-page">
+
+  {# ---------- hlavička profilu ---------- #}
+  <section class="profile-hero">
+    {# banner: vlastný obrázok, alebo farebná téma (trieda banner-<téma>) #}
+    <div class="profile-cover banner-{{ profile.banner_theme_key }} {{ 'has-image' if profile.banner_filename }}" aria-hidden="true"
+         {% if profile.banner_filename %}style="background-image:url('{{ url_for('profile.banner', filename=profile.banner_filename) }}')"{% endif %}></div>
+    <div class="profile-head">
+      <div class="profile-avatar">{{ avatar(profile, 124) }}</div>
+      <div class="profile-ident">
+        <h1>{{ profile.name }}</h1>
+        <p class="handle">@{{ profile.username }}
+          {% if profile.location and can_see %}<span class="dot">•</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-7.1 7-12a7 7 0 1 0-14 0c0 4.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+            {{ profile.location }}{% endif %}
+          <span class="dot">•</span> na MotoHube od {{ profile.created_at.strftime('%m/%Y') }}
+        </p>
+      </div>
+      <div class="profile-actions">
+        {% if state == 'self' %}
+          <a class="btn-ghost btn-sm" href="{{ url_for('profile.edit') }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Upraviť profil
+          </a>
+        {% else %}
+          {{ friend_button(profile, state, request.path) }}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if can_see %}
+      <div class="profile-stats">
+        <a href="#priatelia" data-tab-link="priatelia"><b>{{ friends|length }}</b><span>Priatelia</span></a>
+        <a href="#ulozene" data-tab-link="ulozene"><b>{{ saved|length }}</b><span>Uložené</span></a>
+        <a href="#oblubene" data-tab-link="oblubene"><b>{{ liked|length }}</b><span>Páči sa mi</span></a>
+        <div><b>{{ profile.years_riding if profile.years_riding is not none else '—' }}</b><span>Rokov v sedle</span></div>
+      </div>
+    {% endif %}
+  </section>
+
+  {% if not can_see %}
+    {# ---------- súkromný profil ---------- #}
+    <section class="panel private-note">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <h2>Tento profil je súkromný</h2>
+      <p>Podrobnosti uvidíš, keď si budete s {{ profile.name }} priatelia.</p>
+    </section>
+  {% else %}
+
+  <div class="profile-grid">
+    {# ---------- ľavý stĺpec: o jazdcovi ---------- #}
+    <aside class="panel about">
+      <h2>O jazdcovi</h2>
+      {% if profile.bio %}
+        <p class="bio">{{ profile.bio }}</p>
+      {% elif state == 'self' %}
+        <p class="muted">Zatiaľ si o sebe nič nenapísal. <a href="{{ url_for('profile.edit') }}">Doplniť</a></p>
+      {% endif %}
+
+      <dl class="facts">
+        <div><dt>Moja motorka</dt><dd>{{ profile.current_bike or '—' }}</dd></div>
+        <div><dt>Vodičské oprávnenie</dt><dd>{{ profile.license_label or '—' }}</dd></div>
+        <div><dt>Štýl jazdy</dt><dd>{{ profile.style_label or '—' }}</dd></div>
+        <div><dt>Jazdí od</dt><dd>{{ profile.riding_since or '—' }}</dd></div>
+      </dl>
+
+      <div class="coming-soon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19c3-1 3-6 6-6s3 5 6 5 3-4 4-4"/><circle cx="4" cy="19" r="1.4"/><circle cx="20" cy="14" r="1.4"/></svg>
+        Trasy a obľúbené lokácie pribudnú čoskoro.
+      </div>
+    </aside>
+
+    {# ---------- pravý stĺpec: záložky (profile.js) ---------- #}
+    <section class="panel tabs-panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="ulozene" class="active">Uložené motorky <span>{{ saved|length }}</span></button>
+        <button role="tab" data-tab="oblubene">Páči sa mi <span>{{ liked|length }}</span></button>
+        <button role="tab" data-tab="priatelia">Priatelia <span>{{ friends|length }}</span></button>
+      </div>
+
+      {% macro bike_list(items, empty_text, icon) %}
+        {% if items %}
+          <ul class="bike-list">
+            {% for mark in items %}
+              <li>
+                <span class="bike-ico">{{ icon }}</span>
+                <a class="bike-name" href="{{ bike_link(mark) }}">
+                  <b>{{ mark.title }}</b>
+                  {% if mark.year %}<small>{{ mark.year }}</small>{% endif %}
+                </a>
+                <a class="btn-ghost btn-xs" href="{{ bike_link(mark) }}">Detail</a>
+                {% if state == 'self' %}
+                  <form method="post" action="{{ url_for('profile.remove_mark', mark_id=mark.id) }}" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="icon-btn" type="submit" title="Odobrať" aria-label="Odobrať {{ mark.title }}">✕</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-mini">
+            <p>{{ empty_text }}</p>
+            {% if state == 'self' %}<a class="btn-primary btn-sm" href="{{ url_for('main.motorky') }}">Prehľadávať motorky</a>{% endif %}
+          </div>
+        {% endif %}
+      {% endmacro %}
+
+      <div class="tab-pane active" id="tab-ulozene" role="tabpanel">
+        {{ bike_list(saved, 'Zatiaľ žiadne uložené motorky.' if state != 'self' else 'Ulož si motorky, ktoré ťa zaujali – ikonou záložky v databáze.', '🔖') }}
+      </div>
+      <div class="tab-pane" id="tab-oblubene" role="tabpanel">
+        {{ bike_list(liked, 'Zatiaľ žiadne obľúbené motorky.' if state != 'self' else 'Daj srdiečko motorkám, ktoré sa ti páčia.', '♥') }}
+      </div>
+      <div class="tab-pane" id="tab-priatelia" role="tabpanel">
+        {% if friends %}
+          <ul class="people-grid">
+            {% for f in friends %}
+              <li>
+                <a href="{{ url_for('profile.view', username=f.username) }}" class="person">
+                  {{ avatar(f, 52) }}
+                  <b>{{ f.name }}</b>
+                  <small>@{{ f.username }}</small>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-mini">
+            <p>{{ 'Zatiaľ žiadni priatelia.' }}</p>
+            {% if state == 'self' %}<a class="btn-primary btn-sm" href="{{ url_for('friends.index') }}">Nájsť jazdcov</a>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
