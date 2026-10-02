@@ -196,7 +196,7 @@ motohub/
 
 ## Autor a poďakovanie
 
-**Meno Priezvisko** – SPŠE Zochova, trieda 4.C, 2026/2027
+**Ivan Kiss** – SPŠE Zochova, trieda 4.C, 2026/2027
 
 Ďakujem za dáta a služby:
 [API Ninjas](https://api-ninjas.com/) (parametre motoriek),
