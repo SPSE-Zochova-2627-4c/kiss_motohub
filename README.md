@@ -10,8 +10,6 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?logo=javascript&logoColor=black)
 ![Stav](https://img.shields.io/badge/stav-vo%20v%C3%BDvoji-9b4dff)
 
-![Homepage MotoHub](docs/screenshots/homepage.png)
-
 </div>
 
 ## Obsah
@@ -60,7 +58,6 @@ zdieľanie trás, zaujímavých lokalít a organizovanie spoločných stretnutí
 <details>
 <summary><b>Porovnanie motoriek</b> (klikni pre zobrazenie)</summary>
 
-![Porovnanie motoriek](docs/screenshots/porovnanie.png)
 
 </details>
 
