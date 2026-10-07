@@ -49,11 +49,6 @@ zdieľanie trás, zaujímavých lokalít a organizovanie spoločných stretnutí
 | 👥 | **Priatelia** | Vyhľadávanie jazdcov, žiadosti o priateľstvo, upozornenie na nové žiadosti |
 | ✨ | **Dizajn** | Tmavý neónový vzhľad, interaktívna motorka na úvodnej stránke (skús na ňu kliknúť 😉) |
 
-## Ukážky
-
-| MotoAI | Profil |
-|---|---|
-| ![MotoAI chat](docs/screenshots/motoai.png) | ![Profil používateľa](docs/screenshots/profil.png) |
 
 <details>
 <summary><b>Porovnanie motoriek</b> (klikni pre zobrazenie)</summary>
