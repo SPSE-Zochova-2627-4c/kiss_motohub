@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}{{ person.name() }} – MotoHub{% endblock %}
+{% block content %}
+<main class="wrap">
+  <section class="panel profile-head">
+    {{ banner(person) }}
+    <div class="profile-info">
+      {{ avatar(person, 110) }}
+      <div class="grow">
+        <h1>{{ person.name() }}</h1>
+        <p class="muted">@{{ person.username }} {% if person.location %}· 📍 {{ person.location }}{% endif %}</p>
+      </div>
+
+      {% if person.id == user.id %}
+        <a class="btn-ghost" href="/profil/upravit">Upraviť profil</a>
+      {% elif not friend %}
+        <a class="btn" href="/priatelia/pridat/{{ person.id }}">+ Pridať do priateľov</a>
+      {% elif friend.accepted %}
+        <a class="btn-ghost" href="/priatelia/odobrat/{{ person.id }}">✓ Priatelia (odobrať)</a>
+      {% elif friend.to_id == user.id %}
+        <a class="btn" href="/priatelia/prijat/{{ person.id }}">Prijať žiadosť</a>
+      {% else %}
+        <a class="btn-ghost" href="/priatelia/odobrat/{{ person.id }}">Žiadosť odoslaná (zrušiť)</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="columns">
+    <section class="panel">
+      <h2>O jazdcovi</h2>
+      <p>{{ person.bio or 'Zatiaľ nič o sebe nenapísal.' }}</p>
+      <p><span class="muted">Motorka:</span> {{ person.current_bike or '—' }}</p>
+      <p><span class="muted">Vodičák:</span> {{ person.license or '—' }}</p>
+      <p><span class="muted">Štýl jazdy:</span> {{ person.riding_style or '—' }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>Trasy ({{ routes|length }})</h2>
+      {% for r in routes %}
+        <div class="row">🛣️ <a href="/trasy/{{ r.id }}">{{ r.name }}</a> <span class="muted">{{ r.length_km }} km</span></div>
+      {% else %}<p class="muted">Zatiaľ žiadne trasy.</p>{% endfor %}
+
+      <h2>Lokácie ({{ places|length }})</h2>
+      {% for p in places %}
+        <div class="row">📍 <a href="/lokacie/{{ p.id }}">{{ p.name }}</a> <span class="muted">{{ p.category }}</span></div>
+      {% else %}<p class="muted">Zatiaľ žiadne miesta.</p>{% endfor %}
+
+      <h2>Uložené motorky ({{ saved|length }})</h2>
+      {% for b in saved %}
+        <div class="row">🔖 <a href="/motorky?make={{ b.make }}&model={{ b.model }}">{{ b.make }} {{ b.model }} {{ b.year }}</a>
+          {% if person.id == user.id %}<a class="x" href="/motorka/{{ b.id }}/zmazat">✕</a>{% endif %}</div>
+      {% else %}<p class="muted">Žiadne uložené motorky.</p>{% endfor %}
+
+      <h2>Páči sa mi ({{ liked|length }})</h2>
+      {% for b in liked %}
+        <div class="row">♥ <a href="/motorky?make={{ b.make }}&model={{ b.model }}">{{ b.make }} {{ b.model }} {{ b.year }}</a>
+          {% if person.id == user.id %}<a class="x" href="/motorka/{{ b.id }}/zmazat">✕</a>{% endif %}</div>
+      {% else %}<p class="muted">Zatiaľ nič.</p>{% endfor %}
+
+      <h2>Priatelia ({{ friends|length }})</h2>
+      <div class="people">
+        {% for f in friends %}
+          <a href="/profil/{{ f.username }}">{{ avatar(f, 48) }}<span>{{ f.name() }}</span></a>
+        {% else %}<p class="muted">Zatiaľ žiadni priatelia.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

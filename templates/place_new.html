@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Nové miesto – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <h1>Nové miesto</h1>
+  <p class="muted">Klikni na mapu, kde sa miesto nachádza. Špendlík môžeš potom ešte potiahnuť.</p>
+
+  <div class="columns route-new">
+    <div>
+      <div class="map panel" id="map"></div>
+      <button class="btn-ghost" id="here" type="button">📍 Som tu – použiť moju polohu</button>
+    </div>
+
+    <form class="panel" method="post" enctype="multipart/form-data" id="place-form">
+      <label>Názov <input name="name" required placeholder="napr. Vyhliadka Pezinská Baba"></label>
+      <label>Kategória
+        <select name="category">
+          {% for name, icon in categories.items() %}<option value="{{ name }}">{{ icon }} {{ name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Popis <textarea name="description" rows="4" placeholder="Čo tu nájdeš, kedy je otvorené, kde zaparkovať…"></textarea></label>
+      <label>Fotka (nepovinné) <input type="file" name="photo" accept="image/*"></label>
+      <!-- súradnice vyplní lokacie.js po kliknutí na mapu -->
+      <input type="hidden" name="lat" id="lat">
+      <input type="hidden" name="lng" id="lng">
+      <button class="btn">Uložiť miesto</button>
+    </form>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lokacie.js') }}"></script>{% endblock %}

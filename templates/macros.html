@@ -1,0 +1,17 @@
+{# profilovka – nahratá fotka (.jpg), vybraná ikonka, alebo prvé písmeno mena #}
+{% macro avatar(u, size=40) %}
+  {% if u.avatar and u.avatar.endswith('.jpg') %}
+    <img class="avatar" src="{{ url_for('static', filename='uploads/' + u.avatar) }}" style="width:{{ size }}px;height:{{ size }}px" alt="">
+  {% else %}
+    <span class="avatar letter" style="width:{{ size }}px;height:{{ size }}px;font-size:{{ size // 2 }}px">{{ u.avatar or u.name()[0] | upper }}</span>
+  {% endif %}
+{% endmacro %}
+
+{# banner – nahratý obrázok (.jpg) alebo farba (CSS trieda, napr. "ocean") #}
+{% macro banner(u, cls='') %}
+  {% if u.banner and u.banner.endswith('.jpg') %}
+    <div class="banner {{ cls }}" style="background-image:url('{{ url_for('static', filename='uploads/' + u.banner) }}')"></div>
+  {% else %}
+    <div class="banner {{ cls }} {{ u.banner or 'fialova' }}"></div>
+  {% endif %}
+{% endmacro %}

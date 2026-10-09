@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Registrácia – MotoHub{% endblock %}
+{% block content %}
+<main class="wrap">
+  <form class="panel form-card" method="post">
+    <h1>Registrácia</h1>
+    <label>Používateľské meno <input name="username" required></label>
+    <label>E-mail <input type="email" name="email" required></label>
+    <label>Heslo <input type="password" name="password" required></label>
+    <label>Heslo znova <input type="password" name="password2" required></label>
+    <button class="btn">Vytvoriť účet</button>
+    <p class="muted">Už máš účet? <a href="/prihlasenie">Prihlás sa</a></p>
+  </form>
+</main>
+{% endblock %}

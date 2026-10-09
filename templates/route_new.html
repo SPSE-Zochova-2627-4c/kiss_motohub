@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Nová trasa – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <h1>Nová trasa</h1>
+  <p class="muted">Klikaj na mapu – čiara sa prichytí na cesty. Tlačidlom „Späť" zmažeš posledný bod.</p>
+
+  <div class="columns route-new">
+    <div>
+      <div class="map panel" id="map"></div>
+      <button class="btn-ghost" id="undo" type="button">↶ Späť</button>
+      <span class="muted">Dĺžka: <b id="length">0</b> km</span>
+    </div>
+
+    <form class="panel" method="post" id="route-form">
+      <label>Názov trasy <input name="name" required placeholder="napr. Malé Karpaty – Pezinská Baba"></label>
+      <label>Popis <textarea name="description" rows="4" placeholder="Stav cesty, zaujímavé zákruty, kde sa zastaviť…"></textarea></label>
+      <label>Náročnosť
+        <select name="difficulty">
+          <option>Ľahká</option><option>Stredná</option><option>Náročná</option>
+        </select>
+      </label>
+      <!-- tieto polia vyplní trasy.js -->
+      <input type="hidden" name="points" id="points">
+      <input type="hidden" name="length" id="length-input" value="0">
+      <button class="btn">Uložiť trasu</button>
+    </form>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/trasy.js') }}"></script>{% endblock %}

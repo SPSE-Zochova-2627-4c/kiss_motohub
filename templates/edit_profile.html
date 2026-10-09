@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Upraviť profil – MotoHub{% endblock %}
+{% block content %}
+<main class="wrap">
+  <h1>Upraviť profil</h1>
+
+  <div class="columns">
+    <section class="panel">
+      <h2>Profilovka</h2>
+      <!-- po výbere fotky sa otvorí výrez (cropper.js) -->
+      <form method="post" action="/profil/fotka" enctype="multipart/form-data" class="photo-form">
+        <input type="hidden" name="kind" value="avatar">
+        {{ avatar(user, 120) }}
+        <label class="btn-ghost">Nahrať fotku <input type="file" name="photo" accept="image/*" hidden data-ratio="1"></label>
+      </form>
+      <!-- alebo stačí vybrať ikonku -->
+      <form method="post" action="/profil/vzhlad" class="picker">
+        {% for icon in icons %}
+          <button name="icon" value="{{ icon }}" class="{{ 'on' if user.avatar == icon }}">{{ icon }}</button>
+        {% endfor %}
+      </form>
+
+      <h2>Banner</h2>
+      <form method="post" action="/profil/fotka" enctype="multipart/form-data" class="photo-form">
+        <input type="hidden" name="kind" value="banner">
+        {{ banner(user, 'small') }}
+        <label class="btn-ghost">Nahrať obrázok <input type="file" name="photo" accept="image/*" hidden data-ratio="5"></label>
+      </form>
+      <form method="post" action="/profil/vzhlad" class="picker">
+        {% for color in colors %}
+          <button name="color" value="{{ color }}" class="color {{ color }} {{ 'on' if user.banner == color }}" title="{{ color }}"></button>
+        {% endfor %}
+      </form>
+
+      <h2>Zmena hesla</h2>
+      <form method="post" action="/profil/heslo">
+        <label>Staré heslo <input type="password" name="old" required></label>
+        <label>Nové heslo <input type="password" name="new" required></label>
+        <button class="btn-ghost">Zmeniť heslo</button>
+      </form>
+    </section>
+
+    <form class="panel" method="post">
+      <h2>Údaje</h2>
+      <label>Zobrazované meno <input name="display_name" value="{{ user.display_name or '' }}"></label>
+      <label>Mesto <input name="location" value="{{ user.location or '' }}"></label>
+      <label>O mne <textarea name="bio" rows="3">{{ user.bio or '' }}</textarea></label>
+      <label>Moja motorka <input name="current_bike" value="{{ user.current_bike or '' }}"></label>
+      <label>Vodičské oprávnenie
+        <select name="license">
+          {% for l in ['', 'AM', 'A1', 'A2', 'A'] %}<option {{ 'selected' if user.license == l }}>{{ l }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Štýl jazdy
+        <select name="riding_style">
+          {% for s in ['', 'Šport', 'Naked', 'Cestovanie', 'Enduro', 'Cruiser', 'Skúter'] %}
+            <option {{ 'selected' if user.riding_style == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn">Uložiť</button>
+    </form>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/cropper.js') }}"></script>{% endblock %}

@@ -1,45 +1,27 @@
-{#
-  motorky.html – databáza motoriek: vyhľadávací formulár, výsledky a detail motorky
-  v okne (modal). Dáta načítava motorky.js z /api/motorcycles.
-#}
 {% extends 'base.html' %}
-
-{% block title %}Motorky — MotoHub{% endblock %}
-
+{% block title %}Motorky – MotoHub{% endblock %}
 {% block content %}
-  <main class="wrap page">
-    <div class="page-head">
-      <h1>Databáza motoriek</h1>
-      <p>Vyhľadávaj motorky podľa značky, modelu a roku výroby.</p>
-    </div>
+<main class="wrap">
+  <h1>Databáza motoriek</h1>
+  <p class="muted">Vyhľadávaj motorky podľa značky, modelu a roku.</p>
 
-    <form class="search-panel" id="search-form">
-      <input type="text" id="f-make" placeholder="Značka (napr. yamaha)" required>
-      <input type="text" id="f-model" placeholder="Model (napr. r1)">
-      <input type="text" id="f-year" placeholder="Rok (napr. 2024)">
-      <button type="submit">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        Hľadať
-      </button>
-    </form>
+  <form class="panel search" id="search">
+    <input name="make" placeholder="Značka (napr. KTM)" list="brands">
+    <datalist id="brands"></datalist>
+    <input name="model" placeholder="Model (napr. Duke 390)">
+    <input name="year" placeholder="Rok">
+    <button class="btn">Hľadať</button>
+  </form>
 
-    <div id="results" class="results" data-logged-in="{{ '1' if current_user else '0' }}">
-      <div class="empty-state">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 10h4l2 3.5h4M9 10 7 7H4"/></svg>
-        <p>Zadaj aspoň značku motorky a klikni na Hľadať.</p>
-      </div>
-    </div>
-  </main>
+  <div id="results" data-logged="{{ 1 if user else 0 }}"></div>
 
-  <div class="modal-backdrop" id="modal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <button class="modal-close" id="modal-close" aria-label="Zavrieť">×</button>
-      <div id="modal-body"></div>
-    </div>
+  <!-- okno s detailom motorky -->
+  <div class="modal" id="modal" onclick="if (event.target === this) this.classList.remove('open')">
+    <div class="panel modal-box"><div id="modal-body"></div></div>
   </div>
+</main>
 {% endblock %}
-
 {% block scripts %}
-  <script src="{{ url_for('static', filename='js/moto-common.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/motorky.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bikes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/motorky.js') }}"></script>
 {% endblock %}

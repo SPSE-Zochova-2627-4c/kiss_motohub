@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import avatar %}
+{% block title %}{{ route.name }} – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="title-row">
+    <div>
+      <h1>{{ route.name }}</h1>
+      <p class="muted"><b>{{ route.length_km }} km</b> · {{ route.difficulty }} · ♥ {{ route.likes|length }}</p>
+    </div>
+    <div>
+      {% if user %}
+        <a class="{{ 'btn' if liked else 'btn-ghost' }}" href="/trasy/{{ route.id }}/paci-sa">♥ {{ 'Páči sa mi' if liked else 'Dať páči sa mi' }}</a>
+      {% endif %}
+      {% if user and user.id == route.user_id %}
+        <a class="btn-ghost" href="/trasy/{{ route.id }}/zmazat" onclick="return confirm('Naozaj zmazať trasu?')">Zmazať</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="map panel big" id="map" data-points="{{ route.points }}"></div>
+
+  <section class="panel">
+    <div class="row">{{ avatar(route.author, 36) }} <a href="/profil/{{ route.author.username }}">{{ route.author.name() }}</a></div>
+    <p>{{ route.description or 'Bez popisu.' }}</p>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/trasy.js') }}"></script>{% endblock %}

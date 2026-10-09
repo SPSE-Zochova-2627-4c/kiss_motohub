@@ -1,99 +1,48 @@
-{#
-  compare.html – porovnanie motoriek.
-  Celý obsah vykresľuje static/js/compare.js; tu je iba kostra sekcií.
-  data-rider = popis jazdcu z profilu (pre AI verdikt na mieru).
-#}
 {% extends 'base.html' %}
-
-{% block title %}Porovnanie motoriek — MotoHub{% endblock %}
-
+{% block title %}Porovnanie – MotoHub{% endblock %}
 {% block content %}
-<main class="wrap page compare-page" id="compare"
-      data-logged-in="{{ '1' if current_user else '0' }}" data-max="{{ max_bikes }}" data-rider="{{ rider }}">
-  <div class="page-head">
-    <h1>Porovnanie motoriek</h1>
-    <p>Vyber 2 až {{ max_bikes }} motorky a porovnaj výkon, hmotnosť, ceny aj vhodnosť pre tvoj vodičák.</p>
-  </div>
+<main class="wrap">
+  <h1>Porovnanie motoriek</h1>
+  <p class="muted">Pridaj 2 až 4 motorky a porovnaj ich parametre, ceny a vhodnosť pre vodičák.</p>
 
-  {# karty vybraných motoriek + tlačidlo "Pridať motorku" #}
-  <section class="compare-slots" id="slots" aria-label="Vybrané motorky"></section>
+  <form class="panel search" id="add">
+    <input name="make" placeholder="Značka (nepovinné)" list="brands">
+    <datalist id="brands"></datalist>
+    <input name="model" placeholder="Model, napr. Duke 390" autocomplete="off" required>
+    <input name="year" placeholder="Rok">
+    <button class="btn">Pridať</button>
+  </form>
+  <!-- návrhy motoriek počas písania (compare.js) -->
+  <div class="suggestions" id="suggestions"></div>
 
-  {# tipy, keď ešte nie je nič vybrané #}
-  <section class="panel presets" id="presets">
-    <h2>Obľúbené porovnania</h2>
-    <div class="preset-list" id="preset-list"></div>
-  </section>
+  <div class="slots" id="slots"></div>
 
-  <div id="compare-body" hidden>
-    {# ---------- grafy hlavných parametrov ---------- #}
+  <div id="compare" hidden>
     <section class="panel">
-      <div class="section-head">
-        <h2>Hlavné parametre</h2>
-        <p class="muted small" id="wins-summary"></p>
-      </div>
-      <div id="bars" class="bars"></div>
+      <h2>Hlavné parametre</h2>
+      <div id="bars"></div>
     </section>
 
-    {# ---------- ceny a dostupnosť ---------- #}
     <section class="panel">
-      <div class="section-head">
-        <div>
-          <h2>Cena a dostupnosť</h2>
-          <p class="muted small">API s parametrami ceny neobsahuje – odhad pripraví MotoAI podľa slovenského trhu.
-            Je <b>orientačný</b>, skutočné ceny over v inzerátoch.</p>
-        </div>
-        {% if current_user %}
-          <button type="button" class="btn-primary btn-sm" id="price-btn">
-            <span class="ai-orb tiny" aria-hidden="true"></span> Odhadnúť ceny s MotoAI
-          </button>
-        {% else %}
-          <a class="btn-ghost btn-sm" href="{{ url_for('auth.login', next='/porovnanie') }}">Prihlás sa pre odhad cien</a>
-        {% endif %}
-      </div>
-      <div id="prices" class="price-grid"></div>
+      <h2>Cena a verdikt MotoAI</h2>
+      {% if user %}
+        <button class="btn" id="prices-btn">Odhadnúť ceny</button>
+        <button class="btn" id="verdict-btn">Ktorú vybrať?</button>
+      {% else %}
+        <p class="muted"><a href="/prihlasenie">Prihlás sa</a> a MotoAI ti odhadne ceny a poradí.</p>
+      {% endif %}
+      <p class="muted small">Ceny sú iba orientačný odhad AI – API Ninjas ceny neposkytuje.</p>
+      <div class="ai-text" id="ai-text"></div>
     </section>
 
-    {# ---------- AI verdikt ---------- #}
     <section class="panel">
-      <div class="section-head">
-        <div>
-          <h2>Verdikt MotoAI</h2>
-          <p class="muted small">
-            {% if rider %}Odporúčanie na mieru podľa tvojho profilu: {{ rider }}.
-            {% elif current_user %}Tip: doplň si v profile vodičák a štýl jazdy – verdikt bude presnejší.
-            {% else %}Ktorú vybrať a prečo – zhrnutie od AI.{% endif %}
-          </p>
-        </div>
-        {% if current_user %}
-          <button type="button" class="btn-primary btn-sm" id="verdict-btn">
-            <span class="ai-orb tiny" aria-hidden="true"></span> <span class="label">Vypýtať verdikt</span>
-          </button>
-        {% else %}
-          <a class="btn-ghost btn-sm" href="{{ url_for('auth.login', next='/porovnanie') }}">Prihlás sa pre verdikt</a>
-        {% endif %}
-      </div>
-      <div id="verdict" class="verdict" hidden></div>
-    </section>
-
-    {# ---------- tabuľka všetkých parametrov ---------- #}
-    <section class="panel">
-      <div class="section-head">
-        <h2>Všetky parametre</h2>
-        <label class="switch compact">
-          <input type="checkbox" id="diff-only">
-          <span class="switch-ui" aria-hidden="true"></span>
-          <span class="switch-text"><b>Iba rozdiely</b></span>
-        </label>
-      </div>
-      <div class="table-wrap">
-        <table class="spec-table" id="spec-table"></table>
-      </div>
+      <h2>Všetky parametre</h2>
+      <div class="table-wrap"><table id="table"></table></div>
     </section>
   </div>
 </main>
 {% endblock %}
-
 {% block scripts %}
-  <script src="{{ url_for('static', filename='js/moto-common.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bikes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/compare.js') }}"></script>
 {% endblock %}

@@ -1,46 +1,55 @@
-{#
-  base.html – spoločná kostra všetkých stránok.
-  Ostatné šablóny ju "dedia" ({% extends 'base.html' %}) a vypĺňajú iba bloky:
-    title    ... názov v záložke prehliadača
-    content  ... obsah stránky
-    scripts  ... JavaScript konkrétnej stránky
-#}
+{% from 'macros.html' import avatar, banner %}
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-{# CSRF token pre JavaScript (fetch ho posiela v hlavičke X-CSRF-Token) #}
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{% block title %}MotoHub{% endblock %}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MotoHub{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body>
-  {# dekoratívne pozadie: fialová žiara, zrnitosť, neónová mriežka (background.js) #}
-  <div class="bg-glow"></div>
-  <div class="bg-noise"></div>
-  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <canvas id="bg"></canvas>
 
-  {% include 'partials/nav.html' %}
+  <header class="wrap nav">
+    <a class="logo" href="/">▲ Moto<b>Hub</b></a>
+    <nav>
+      <a href="/" class="{{ 'active' if active == 'home' }}">Domov</a>
+      <a href="/motorky" class="{{ 'active' if active == 'motorky' }}">Motorky</a>
+      <a href="/porovnanie" class="{{ 'active' if active == 'porovnanie' }}">Porovnanie</a>
+      <a href="/trasy" class="{{ 'active' if active == 'trasy' }}">Trasy</a>
+      <a href="/lokacie" class="{{ 'active' if active == 'lokacie' }}">Lokácie</a>
+      <a href="#">Meetupy</a>
+      <a href="#">Komunita</a>
+      <a href="/profil" class="{{ 'active' if active == 'profil' }}">Profil</a>
+    </nav>
 
-  {# Krátke oznámenia zo servera (napr. "Bol si prihlásený") – flash správy #}
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="toasts" id="toasts">
-        {% for category, message in messages %}
-          <div class="toast toast-{{ category }}" role="status">{{ message }}</div>
-        {% endfor %}
+    {% if user %}
+      <div class="menu">
+        <button class="user-btn" onclick="this.parentElement.classList.toggle('open')">
+          {{ avatar(user, 30) }} {{ user.name() }}
+          {% if requests_count %}<span class="badge">{{ requests_count }}</span>{% endif %}
+        </button>
+        <div class="dropdown">
+          <a href="/profil">Môj profil</a>
+          <a href="/profil/upravit">Upraviť profil</a>
+          <a href="/priatelia">Priatelia {% if requests_count %}({{ requests_count }}){% endif %}</a>
+          <a href="/odhlasenie" class="red">Odhlásiť sa</a>
+        </div>
       </div>
+    {% else %}
+      <a class="btn-ghost" href="/prihlasenie">Prihlásiť sa</a>
     {% endif %}
-  {% endwith %}
+  </header>
+
+  {% for message in get_flashed_messages() %}
+    <div class="toast">{{ message }}</div>
+  {% endfor %}
 
   {% block content %}{% endblock %}
 
   <script src="{{ url_for('static', filename='js/background.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

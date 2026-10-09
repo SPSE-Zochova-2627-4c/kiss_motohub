@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ place.name }} – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="title-row">
+    <div>
+      <h1>{{ icon }} {{ place.name }}</h1>
+      <p class="muted">{{ place.category }} ·
+        {% if place.rating() %}<span class="stars">★ {{ place.rating() }}</span> ({{ place.reviews|length }} hodnotení){% else %}zatiaľ bez hodnotenia{% endif %}
+      </p>
+    </div>
+    <div>
+      <!-- odkaz otvorí navigáciu v Google Maps (v mobile priamo v aplikácii) -->
+      <a class="btn" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination={{ place.lat }},{{ place.lng }}">🧭 Navigovať</a>
+      {% if user and user.id == place.user_id %}
+        <a class="btn-ghost" href="/lokacie/{{ place.id }}/zmazat" onclick="return confirm('Naozaj zmazať miesto?')">Zmazať</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="columns">
+    <section class="panel">
+      {% if place.photo %}<img class="place-photo" src="{{ url_for('static', filename='uploads/' + place.photo) }}" alt="">{% endif %}
+      <p>{{ place.description or 'Bez popisu.' }}</p>
+      <div class="row">{{ avatar(place.author, 32) }} Pridal <a href="/profil/{{ place.author.username }}">{{ place.author.name() }}</a></div>
+      <div class="map small-map" id="map" data-lat="{{ place.lat }}" data-lng="{{ place.lng }}" data-icon="{{ icon }}"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Hodnotenia</h2>
+      {% if user %}
+        <form method="post" action="/lokacie/{{ place.id }}/hodnotenie" class="review-form">
+          <select name="stars">
+            {% for n in [5, 4, 3, 2, 1] %}
+              <option value="{{ n }}" {{ 'selected' if my_review and my_review.stars == n }}>{{ '★' * n }}{{ '☆' * (5 - n) }}</option>
+            {% endfor %}
+          </select>
+          <textarea name="text" rows="2" placeholder="Ako sa ti tu páčilo?">{{ my_review.text if my_review else '' }}</textarea>
+          <button class="btn">{{ 'Upraviť hodnotenie' if my_review else 'Pridať hodnotenie' }}</button>
+        </form>
+      {% else %}
+        <p class="muted"><a href="/prihlasenie">Prihlás sa</a> a ohodnoť toto miesto.</p>
+      {% endif %}
+
+      {% for r in place.reviews %}
+        <div class="review">
+          <div class="row">{{ avatar(r.author, 32) }} <b>{{ r.author.name() }}</b> <span class="stars">{{ '★' * r.stars }}</span></div>
+          {% if r.text %}<p>{{ r.text }}</p>{% endif %}
+        </div>
+      {% else %}
+        <p class="muted">Zatiaľ nikto nehodnotil. Buď prvý!</p>
+      {% endfor %}
+    </section>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lokacie.js') }}"></script>{% endblock %}

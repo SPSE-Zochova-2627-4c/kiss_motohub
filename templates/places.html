@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Lokácie – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="title-row">
+    <div>
+      <h1>Lokácie</h1>
+      <p class="muted">Vyhliadky, motorkárske bistrá, servisy a ďalšie miesta od jazdcov.</p>
+    </div>
+    <a class="btn" href="/lokacie/nova">+ Pridať miesto</a>
+  </div>
+
+  <!-- mapa je najprv skrytá, ukáže sa až po kliknutí (lokacie.js) -->
+  <div class="map panel" id="map" hidden></div>
+
+  <!-- filtre: kategórie, hľadanie a moja poloha (lokacie.js) -->
+  <div class="filters">
+    <button class="chip on" data-category="">Všetko</button>
+    {% for name, icon in categories.items() %}
+      <button class="chip" data-category="{{ name }}">{{ icon }} {{ name }}</button>
+    {% endfor %}
+  </div>
+  <div class="search">
+    <input id="find" placeholder="Hľadaj podľa názvu alebo popisu…">
+    <button class="btn-ghost" id="show-map">🗺️ Zobraziť mapu</button>
+    <button class="btn-ghost" id="near">📍 Zoradiť podľa mojej polohy</button>
+  </div>
+
+  <h2>⭐ Odporúčané miesta</h2>
+  <div class="grid places">
+    {% for t in tips %}
+      <a class="panel place-card tip" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination={{ t.lat }},{{ t.lng }}"
+         data-lat="{{ t.lat }}" data-lng="{{ t.lng }}"
+         data-category="{{ t.category }}" data-icon="{{ categories[t.category] }}">
+        <h3>{{ categories[t.category] }} {{ t.name }}</h3>
+        <p class="muted">{{ t.category }} · tip MotoHubu</p>
+        <p class="muted">{{ t.description }}</p>
+        <p class="distance"></p>
+      </a>
+    {% endfor %}
+  </div>
+
+  <h2>Miesta od jazdcov</h2>
+  <div class="grid places">
+    {% for p in places %}
+      <a class="panel place-card" href="/lokacie/{{ p.id }}"
+         data-lat="{{ p.lat }}" data-lng="{{ p.lng }}"
+         data-category="{{ p.category }}" data-icon="{{ categories[p.category] }}">
+        {% if p.photo %}<img src="{{ url_for('static', filename='uploads/' + p.photo) }}" alt="">{% endif %}
+        <h3>{{ categories[p.category] }} {{ p.name }}</h3>
+        <p class="muted">{{ p.category }} · {{ p.author.name() }}</p>
+        <p>{% if p.rating() %}<span class="stars">★ {{ p.rating() }}</span> ({{ p.reviews|length }}){% else %}<span class="muted">Zatiaľ bez hodnotenia</span>{% endif %}</p>
+        <p class="distance"></p>
+        <p class="desc" hidden>{{ p.description }}</p>
+      </a>
+    {% else %}
+      <p class="muted">Zatiaľ tu nie je žiadne miesto. Pridaj prvé!</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lokacie.js') }}"></script>{% endblock %}

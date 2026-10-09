@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Trasy – MotoHub{% endblock %}
+{% block head %}{% include 'map_head.html' %}{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="title-row">
+    <div>
+      <h1>Trasy</h1>
+      <p class="muted">Obľúbené motorkárske trasy od jazdcov MotoHubu.</p>
+    </div>
+    <a class="btn" href="/trasy/nova">+ Pridať trasu</a>
+  </div>
+
+  <!-- mapa je najprv skrytá, ukáže sa až po kliknutí (trasy.js) -->
+  <button class="btn-ghost" id="show-map">🗺️ Zobraziť mapu</button>
+  <div class="map panel" id="map" hidden></div>
+
+  <h2>⭐ Odporúčané trasy</h2>
+  <div class="grid">
+    {% for t in tips %}
+      <div class="panel route-card tip" data-points="{{ t.points|tojson }}">
+        <h3>{{ t.name }}</h3>
+        <p><b>cca {{ t.km }} km</b> · <span class="diff">{{ t.difficulty }}</span></p>
+        <p class="muted">{{ t.description }}</p>
+        <p class="tip-links">
+          <button class="btn-ghost">🗺️ Na mape</button>
+          <a class="btn-ghost" target="_blank" href="https://www.google.com/maps/dir/{% for p in t.points %}{{ p[0] }},{{ p[1] }}/{% endfor %}">Navigovať</a>
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h2>Trasy od jazdcov</h2>
+  <div class="grid">
+    {% for r in routes %}
+      <a class="panel route-card" href="/trasy/{{ r.id }}" data-points="{{ r.points }}">
+        <h3>{{ r.name }}</h3>
+        <p><b>{{ r.length_km }} km</b> · <span class="diff">{{ r.difficulty }}</span> · ♥ {{ r.likes|length }}</p>
+        <p class="muted">{{ r.author.name() }}</p>
+      </a>
+    {% else %}
+      <p class="muted">Zatiaľ tu nie je žiadna trasa. Pridaj prvú!</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/trasy.js') }}"></script>{% endblock %}
